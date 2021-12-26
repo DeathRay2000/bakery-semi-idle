@@ -1,5 +1,7 @@
 <body>
     <div id = 'playerinfo'></div>
+    <div id = 'gold'></div>
+    <div id = 'exp'></div>
     <div id = 'list'></div>
     <div id = 'plots'></div>
     <div id = 'sell'></div>
@@ -14,23 +16,24 @@
     <script>
     gold = 100
     exp = 0
-    function crop(name, cost, time, yield, expyield, value){
-
-        this.name = name
-        this.cost = cost
-        this.time = time
-        this.yield = yield
-        this.expyield = expyield
-        this.value = value
-        this.amount = 2
-        let theelement = document.createElement('div', id = name)
-        console.log(theelement)
-        let list = document.getElementById('list')
-        theelement.innertext = this.name + ": " + JSON.stringify(this.value)
-        list.append(theelement)
-        console.log(this.amount)
+    function getGold(){
+        let thegoldlist = document.getElementById('gold')
+        
+        let Gold = document.createElement('div')
+        Gold.innerText = 'Gold: ' + JSON.stringify(gold)
+        
+        
+        thegoldlist.append(Gold)
+        
     }
-    function sell(crop){
+    function GetExp(){
+        let theexplist = document.getElementById('exp')
+        let Exp = document.createElement('div')
+        Exp.innerText = 'EXP: ' + JSON.stringify(exp)
+        theexplist.append(Exp)
+
+    }
+    const sell = (e)=> {
         
         amountsold = document.createElement('input')
         amountsold.setAttribute('type', 'number')
@@ -53,16 +56,9 @@
                     gold = gold + (sellAmount * crop.value)
                     exp += crop.expyield
                     console.log(sellAmount)
-                    list.querySelectorAll('*').forEach(n => n.remove());
+                    sell.querySelectorAll('*').forEach(n => n.remove());
                     console.log(list.children)
-                    goldcount = document.createElement('div', classname = 'goldcount')
-                    expcount = document.createElement('div', classname = 'expcount')
-                    goldcount.innertext = 'Gold: ' + JSON.stringify(gold)
-                    console.log(gold)
-                    expcount.innertext = 'EXP: ' + JSON.stringify(exp)
-                    console.log(exp)
-                    list.append(goldcount)
-                    list.append(expcount)
+                    
                     for(let i = 0; i < croplist.length; i++){
                     let item = document.createElement('div', classname = 'item')
                     item.innerText = croplist[i].name + ': ' + JSON.stringify(croplist[i].amount)
@@ -72,7 +68,7 @@
                     sellbutton.addEventListener('click',()=> sell(croplist[i]))
                     
             }
-            
+                getGold()
                 }  
                 }
                
@@ -81,6 +77,23 @@
             
       })
     }
+    function crop(name, cost, time, yield, expyield, value){
+
+        this.name = name
+        this.cost = cost
+        this.time = time
+        this.yield = yield
+        this.expyield = expyield
+        this.value = value
+        this.amount = 2
+        let theelement = document.createElement('div', id = name)
+        console.log(theelement)
+        let list = document.getElementById('list')
+        theelement.innertext = this.name + ": " + JSON.stringify(this.value)
+        list.append(theelement)
+        console.log(this.amount)
+    }
+
       
   
         
@@ -159,12 +172,13 @@
         this.harvest = function(crop){
             croplist = [wheat, sugarcane]
             this.crop.amount += this.crop.yield
+            exp += this.crop.expyield
             this.crop = null
             console.log(this.crop)
             this.fieldElement.innerText = 'Not In Use'
             // this.fieldElement.addEventListener('click',() => this.plant())
             list = document.getElementById('list')
-            
+            GetExp()
                console.log(list.children) 
                 // while(list.lastElementChild){
                 //     console.log(list.lastElementChild)
@@ -267,6 +281,7 @@
         this.takeout = function(){
             recipelist = [flour, sugar, bread, sugarcookies]
             this.recipe.amount += 1
+            exp += this.recipe.expyield
             this.recipe = null
             console.log(this.recipe)
             this.ovenElement.innerText = 'Not In Use'
@@ -378,6 +393,11 @@
     console.log(flour.ingredients)
     console.log(sugarcookies.ingredients)
     // ingredientlist = [wheat, sugarcane, flour, sugar]
+
+
+    getGold()
+    GetExp()
+
     recipelist = [flour, sugar, bread, sugarcookies]
     console.log(field1.crop)
     let oven1 = new oven([flour, sugar, bread, sugarcookies])
