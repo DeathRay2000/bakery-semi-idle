@@ -3,6 +3,7 @@
     <div id = 'gold'></div>
     <div id = 'exp'></div>
     <div id = 'Inventory'></div>
+    <div id = 'info'></div>
     <div id = 'plots'></div>
     <div id = 'sell'></div>
     <div id = 'ovenlist'></div>
@@ -57,7 +58,7 @@
         localStorage.setItem('gold', gold)
         
         thegoldlist.append(Gold)
-        save(gold, exp, croplist, recipelist)
+        save(gold, exp, croplist, recipelist, numfields, numovens)
     }
   
         
@@ -68,7 +69,7 @@
         Exp.innerText = 'EXP: ' + JSON.stringify(exp)
         localStorage.setItem('exp', exp)
         theexplist.append(Exp)
-        save(gold, exp, croplist, recipelist)
+        save(gold, exp, croplist, recipelist, numfields, numovens)
 
     }
     function sell(crop, croplist, recipelist){
@@ -136,7 +137,19 @@
         list.append(theelement)
         // console.log(this.amount)
     }
-
+    function getOvensandFields(numovens, numfields, croplist, recipelist){
+        let ovenlist = document.getElementById('ovens')
+        ovenlist.querySelectorAll('*').forEach(n => n.remove())
+        for(let i = 0; i < numovens; i++){
+            newoven = new oven(croplist, recipelist)
+        }
+        let fieldlist = document.getElementById('plots')
+        fieldlist.querySelectorAll('*').forEach(n => n.remove())
+        for(let i = 0; i < numovens; i++){
+            newfield = new field(croplist, recipelist)
+        }
+        save(gold, exp, croplist, recipelist, numfields, numovens)
+    }
       
   
         
@@ -188,7 +201,7 @@
                 
                 croplist.push(this.crop)
                 this.unlockswitch.remove()
-                save(gold, exp, croplist, recipelist)
+                save(gold, exp, croplist, recipelist, numfields, numovens)
                 getGold()
 
             }
@@ -220,7 +233,7 @@
                 gold = gold - this.unlockcost
                 
                 recipelist.push(recipe)
-                save(gold, exp, croplist, recipelist)
+                save(gold, exp, croplist, recipelist, numfields, numovens)
                 this.unlockswitch.remove()
                 getGold()
                 
@@ -244,17 +257,15 @@
     const sugarcookies = new recipe('Sugar Cookies',[flour,sugar], 45, 90, 12)
     
 
-    function save(gold, exp, croplist, recipelist){
+    function save(gold, exp, croplist, recipelist, numfields, numovens){
        
         storage.setItem('gold', gold)
         storage.setItem('exp', exp)
-        console.log(recipelist)
-        console.log(JSON.stringify(recipelist))
-        for(i of croplist){
-            
-        }
+        storage.setItem('numovens', numovens)
+        storage.setItem('numfields', numfields)
         storage.setItem('recipelist', JSON.stringify(recipelist))
         storage.setItem('croplist', JSON.stringify(croplist))
+        st
         console.log(storage)
         // console.log(JSON.parse(storage.getItem('croplist')))
         // console.log(JSON.parse(storage.getItem('recipelist')))
@@ -274,7 +285,9 @@
         'exp': 0,
         'gold': 100,
         'recipelist': [flour, sugar, bread, sugarcookies],
-        'croplist': [wheat, sugarcane]
+        'croplist': [wheat, sugarcane],
+        'numfields': 1,
+        'numovens': 1
         }
     
         console.log(player)
@@ -289,6 +302,8 @@
             // console.log(storage.getItem('croplist'))
             player['croplist'] = JSON.parse(storage.getItem('croplist') )
             player['recipelist'] = JSON.parse(storage.getItem('recipelist') )
+            player['numfields'] = Number(storage.getItem('numfields'))
+            player['numovens'] = Number(storage.getItem('numovens'))
             console.log('I should not be seeing this')
             // player['recipelist'] = storage.getItem('recipelist')
             // player['croplist'] = storage.getItem('croplist')
@@ -305,6 +320,8 @@
     
     let gold = player['gold']
     let exp = player['exp']
+    let numfields = player['numfields']
+    let numovens = player['numovens']
     console.log(recipelist)
     console.log(croplist)
     
@@ -404,7 +421,7 @@
     
     }
     
-    let field1 = new field(croplist,recipelist)
+    let field1 = new field(croplist,recipelist, numfields)
     function newField(fieldPrice){
         if(gold < fieldPrice){
             alert('Insufficient Gold')
@@ -412,10 +429,11 @@
         else{
 
             purchase = new field(croplist,recipelist)
-            fieldPrice = fieldPrice * 1.25
+            numfields += 1
+            getOvensandFields(numfields, numovens, croplist, recipelist)
         }
     }
-    let fieldPrice = 100
+    let fieldPrice = 100 * (1.25 ** numfields) 
     let addButton = document.createElement('button')
     addButton.innerText = ('new field' + JSON.stringify(fieldPrice))
     addButton.addEventListener('click', ()=> newField(fieldPrice))
@@ -535,13 +553,65 @@
     
     }
     
+    function cropDescription(crop){
+        // name, cost, time, yield, expyield, value
+        infoElement = document.getElementById('info')
+        describerElement = document.createElement('div')
+        describerElement.InnerText = 'Name: ' + crop.name 
+        + ' seed cost: ' + JSON.stringify(crop.cost) + ' gold.'
+        + ' growth time: ' + JSON.stringify(crop.time) + ' seconds.'
+        + ' Amount yielded: '+ JSON.stringify(crop.yield)
+        + ' Exp gained from harvest: ' + JSON.stringify(crop.expyield) + ' exp.'
+        + ' Value of crop: ' + JSON.stringify(crop.expyield) + ' gold.'
+        infoElement.append(describerElement)
+
+    }
+    function recipeDescription(recipe){
+        function numIngredients(ingredient){
+            num = recipe.ingredients.filter(n => n == ingredient).length
+            return num
+        }
+        // name, ingredients, value, time, expyield
+        let ingredientDescription = ''
+        for(i of recipe.ingredients){
+            ingredientDescription += i.name + ': ' + numIngredients(i) + '\n'
+        }
+        infoElement = document.getElementById('info')
+        describerElement = document.createElement('div')
+        describerElement.InnerText = 'Name: ' + recipe.name 
+        + ' Ingredients needed:' + ingredientDescription
+        + ' bake time: ' + JSON.stringify(recipe.time) + ' seconds.'
+        + ' Exp gained from baking: ' + JSON.stringify(recipe.expyield) + ' exp.'
+        + ' Value of good: ' + JSON.stringify(recipe.value) + ' gold.'
+
+
+
+    }
+
     
     console.log(flour.ingredients)
     console.log(sugarcookies.ingredients)
     // ingredientlist = [wheat, sugarcane, flour, sugar]
     
     console.log(field1.crop)
-    let oven1 = new oven(recipelist, croplist)
+    
+    function newOven(ovenPrice){
+        if(gold < fieldPrice){
+            alert('Insufficient Gold')
+        }
+        else{
+
+            purchase = new field(croplist,recipelist)
+            numfields += 1
+            getOvensandFields(numfields, numovens, croplist, recipelist)
+        }
+    }
+    let ovenPrice = 100 * (1.25 ** numovens) 
+    let ovenaddButton = document.createElement('button')
+    ovenaddButton.innerText = ('new oven' + JSON.stringify(ovenPrice))
+    ovenaddButton.addEventListener('click', ()=> newOven(ovenPrice))
+    ovens = document.getElementById('ovens')
+    ovens.append(ovenaddButton)
    
     const raspberry = new crop( 'raspberry', 50, 75, 6,8,10)
     const blueberry = new crop( 'blueberry', 45, 50, 10, 6, 5)
@@ -590,6 +660,7 @@
     // let unlockableApplePie = new unlockableRecipe(700, 700, applepie)
     getGold()
     getExp()
+    getOvensandFields(numfields, numovens, croplist, recipelist)
     // 
     for(i of croplist){
         console.log(i.name+ ' amount before ' + i.amount)
