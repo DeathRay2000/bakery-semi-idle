@@ -1,0 +1,37 @@
+#plots {
+    background-color: green;
+    height: '300px';
+    width: '300px';
+}
+#ovens{
+    height: '300px';
+    width: '300px';
+    background-color: beige;
+}
+.field {
+    height: '50px';
+    width: '50px';
+    background-color: saddlebrown;
+
+}
+body {
+    background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgyzJwGPNjcoRQGBGjnM3tMi8IMoE15zNcTQ&usqp=CAU');
+}
+#gold {
+    background-color: yellow;
+    width: '150px';
+}
+#exp{
+    background-color: blue;
+}
+#Inventory{
+    background-color: burlywood;
+    height: '400px';
+    width: '250px';
+}
+#unlockablecrops{
+    background-color: gold;
+}
+#unlockablerecipes{
+    background-color: gold;
+}
